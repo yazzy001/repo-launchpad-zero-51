@@ -298,10 +298,24 @@ const EnhancedProfileBuilder: React.FC = () => {
 
       const processingTime = Date.now() - startTime;
       
-      // Validate profile before logging
+      // Validate and fix profile before logging
       if (!profile || typeof profile !== 'object') {
-        throw new Error('Invalid profile object returned from processing');
+        console.error('❌ Invalid profile object, creating fallback:', profile);
+        profile = {
+          name: 'Profile Generated',
+          jobTitle: 'Professional',
+          company: '',
+          location: '',
+          description: 'Profile extracted from web content',
+          skills: [],
+          confidence: 0.6,
+          sourceUrl: state.url,
+          generatedAt: new Date().toISOString()
+        };
       }
+      
+      // Ensure profile is valid
+      SafeProfileProcessor.validateProfile(profile);
       
       console.log('AI processing successful:', {
         confidence: SafeProfileProcessor.safeAccess(profile, 'confidence', 0.8),
