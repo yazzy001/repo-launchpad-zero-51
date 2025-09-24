@@ -48,8 +48,7 @@ export class WebScrapingService {
         const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&premium_proxy=false&timeout=15000`;
         
         const response = await fetch(scrapingBeeUrl, {
-          method: 'GET',
-          timeout: 20000
+          method: 'GET'
         });
         
         if (response.ok) {
@@ -66,6 +65,9 @@ export class WebScrapingService {
         }
       } catch (error) {
         console.error('ScrapingBee error:', error);
+        if (error instanceof Error && error.message.includes('fetch')) {
+          throw new Error('Network error: Unable to connect to ScrapingBee API');
+        }
         throw error instanceof Error ? error : new Error('ScrapingBee request failed');
       }
     },

@@ -5,8 +5,8 @@ export class SafeProfileProcessor {
       return false;
     }
     
-    // Ensure required properties exist with safe defaults
-    if (typeof profile.confidence !== 'number') {
+    // Ensure required properties exist with safe defaults - be more lenient
+    if (typeof profile.confidence !== 'number' || isNaN(profile.confidence)) {
       profile.confidence = 0.8;
     }
     
@@ -18,8 +18,21 @@ export class SafeProfileProcessor {
       profile.sourceUrl = '';
     }
     
-    if (!profile.name) {
-      profile.name = 'Unknown';
+    if (!profile.name || typeof profile.name !== 'string') {
+      profile.name = 'Unknown Profile';
+    }
+    
+    // Ensure arrays exist
+    if (!Array.isArray(profile.skills)) {
+      profile.skills = [];
+    }
+    
+    if (!Array.isArray(profile.projects)) {
+      profile.projects = [];
+    }
+    
+    if (!Array.isArray(profile.experience)) {
+      profile.experience = [];
     }
     
     return true;
