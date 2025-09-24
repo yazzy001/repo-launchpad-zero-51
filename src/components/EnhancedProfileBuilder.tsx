@@ -452,6 +452,23 @@ const EnhancedProfileBuilder: React.FC = () => {
     <div className="min-h-screen relative overflow-hidden">
       <FloatingElements />
       
+      {/* API Key Settings - Top Right */}
+      <div className="absolute top-6 right-6 z-50">
+        <ApiKeySettings />
+      </div>
+      
+      {/* Test Route Link - Top Left */}
+      <div className="absolute top-6 left-6 z-50">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => window.open('/test', '_blank')}
+          className="bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90"
+        >
+          🧪 Test API
+        </Button>
+      </div>
+      
       {/* Enhanced Hero Section */}
       <div className="container mx-auto px-4 py-24 text-center relative z-10">
         <div className="max-w-5xl mx-auto">
