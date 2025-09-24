@@ -42,31 +42,62 @@ export class WebScrapingService {
       const apiKey = WebScrapingService.getScrapingBeeApiKey();
       if (!apiKey) throw new Error('ScrapingBee API key not set');
       
-      console.log(`Trying ScrapingBee API for: ${url}`);
+      console.log(`🐝 Trying ScrapingBee API for: ${url}`);
+      console.log(`🔑 API Key present: ${apiKey ? 'YES' : 'NO'} (length: ${apiKey?.length || 0})`);
       
       try {
-        const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&premium_proxy=false&timeout=15000`;
+        // Enhanced ScrapingBee configuration for IMDB
+        const scrapingBeeUrl = new URL('https://app.scrapingbee.com/api/v1/');
+        scrapingBeeUrl.searchParams.append('api_key', apiKey);
+        scrapingBeeUrl.searchParams.append('url', url);
+        scrapingBeeUrl.searchParams.append('render_js', 'false');
+        scrapingBeeUrl.searchParams.append('premium_proxy', 'true'); // Enable premium proxy for better success
+        scrapingBeeUrl.searchParams.append('timeout', '20000');
+        scrapingBeeUrl.searchParams.append('wait_browser', 'networkidle');
         
-        const response = await fetch(scrapingBeeUrl, {
-          method: 'GET'
+        console.log(`🔗 ScrapingBee URL: ${scrapingBeeUrl.toString()}`);
+        
+        const response = await fetch(scrapingBeeUrl.toString(), {
+          method: 'GET',
+          headers: {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          }
         });
+        
+        console.log(`📊 ScrapingBee response status: ${response.status}`);
         
         if (response.ok) {
           const content = await response.text();
-          if (content && content.length > 100) {
-            console.log(`✅ ScrapingBee successful! Content length: ${content.length}`);
+          console.log(`📄 Content length: ${content.length}`);
+          
+          if (content && content.length > 500) { // Reduced minimum for testing
+            console.log(`✅ ScrapingBee successful! Content preview: ${content.substring(0, 200)}...`);
             return content;
           } else {
-            throw new Error('ScrapingBee returned empty or insufficient content');
+            console.error(`❌ Content too short: "${content.substring(0, 100)}"`);
+            throw new Error(`ScrapingBee returned insufficient content (${content.length} chars)`);
           }
         } else {
           const errorText = await response.text().catch(() => 'Unknown error');
-          throw new Error(`ScrapingBee failed: ${response.status} ${response.statusText} - ${errorText}`);
+          console.error(`❌ ScrapingBee HTTP error: ${response.status} ${response.statusText}`);
+          console.error(`❌ Error details: ${errorText}`);
+          
+          // Handle specific ScrapingBee errors
+          if (response.status === 401) {
+            throw new Error('ScrapingBee API key is invalid or expired');
+          } else if (response.status === 403) {
+            throw new Error('ScrapingBee API access forbidden - check your subscription');
+          } else if (response.status === 429) {
+            throw new Error('ScrapingBee rate limit exceeded - please wait and try again');
+          } else {
+            throw new Error(`ScrapingBee failed: ${response.status} ${response.statusText} - ${errorText}`);
+          }
         }
       } catch (error) {
-        console.error('ScrapingBee error:', error);
+        console.error('🐝 ScrapingBee error:', error);
         if (error instanceof Error && error.message.includes('fetch')) {
-          throw new Error('Network error: Unable to connect to ScrapingBee API');
+          throw new Error('Network error: Unable to connect to ScrapingBee API. Check your internet connection.');
         }
         throw error instanceof Error ? error : new Error('ScrapingBee request failed');
       }

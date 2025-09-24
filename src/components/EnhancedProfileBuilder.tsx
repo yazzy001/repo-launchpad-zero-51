@@ -202,6 +202,13 @@ const EnhancedProfileBuilder: React.FC = () => {
         if (!scrapingBeeKey && (!geminiKey || !EnhancedLLMService.validateApiKey(geminiKey))) {
           throw new Error('Please set ScrapingBee API key for best results, or provide a valid Gemini API key.');
         }
+        
+        console.log('🔧 Debug - API Keys Status:', {
+          scrapingBeeKey: scrapingBeeKey ? `Present (${scrapingBeeKey.length} chars)` : 'Missing',
+          geminiKey: geminiKey ? `Present (${geminiKey.length} chars)` : 'Missing',
+          processingMode: state.processingMode,
+          url: state.url
+        });
 
       // Step 1: Enhanced web scraping
       setState(prev => ({ ...prev, loadingStep: 1 }));
