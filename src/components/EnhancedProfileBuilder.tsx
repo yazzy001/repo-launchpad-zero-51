@@ -16,6 +16,7 @@ import { FloatingElements } from '@/components/FloatingElements';
 import { EnhancedWebScrapingService, EnhancedLLMService, PersonProfile, ProcessingResult } from '@/utils/EnhancedLLMService';
 import { LLMService, WebScrapingService } from '@/utils/LLMService';
 import { realBackendAPI, BackendProfileData } from '@/services/realBackendAPI';
+import { SafeProfileProcessor } from '@/utils/errorBoundary';
 
 interface ProfileBuilderState {
   url: string;
@@ -231,30 +232,47 @@ const EnhancedProfileBuilder: React.FC = () => {
       
       let profile: PersonProfile;
       
-      // If we have ScrapingBee, create profile without Gemini
-      if (scrapingBeeKey) {
-        profile = LLMService.createBasicProfile(state.url, scrapeResult.content);
-        console.log('Profile created using ScrapingBee data only');
-      } else {
-        // Fallback to enhanced service only if no ScrapingBee
-        const processResult: ProcessingResult = await EnhancedLLMService.extractPersonProfile(
-          state.url, 
-          scrapeResult.content
-        );
+        // If we have ScrapingBee, create profile without Gemini
+        if (scrapingBeeKey) {
+          try {
+            profile = LLMService.createBasicProfile(state.url, scrapeResult.content);
+            console.log('Profile created using ScrapingBee data only');
+            
+            // Use safe validation
+            if (!SafeProfileProcessor.validateProfile(profile)) {
+              throw new Error('Invalid profile data returned from ScrapingBee processing');
+            }
+            
+          } catch (scrapingBeeError) {
+            console.error('ScrapingBee profile creation failed:', scrapingBeeError);
+            throw new Error(`ScrapingBee profile creation failed: ${scrapingBeeError instanceof Error ? scrapingBeeError.message : 'Unknown error'}`);
+          }
+        } else {
+          // Fallback to enhanced service only if no ScrapingBee
+          const processResult: ProcessingResult = await EnhancedLLMService.extractPersonProfile(
+            state.url, 
+            scrapeResult.content
+          );
 
-        if (!processResult.success || !processResult.data) {
-          throw new Error(processResult.error || 'AI processing failed');
-        }
-        
-        profile = processResult.data;
+          if (!processResult.success || !processResult.data) {
+            throw new Error(processResult.error || 'AI processing failed');
+          }
+          
+          profile = processResult.data;
+          SafeProfileProcessor.validateProfile(profile);
         }
       }
 
       const processingTime = Date.now() - startTime;
       
+      // Validate profile before logging
+      if (!profile || typeof profile !== 'object') {
+        throw new Error('Invalid profile object returned from processing');
+      }
+      
       console.log('AI processing successful:', {
-        confidence: profile.confidence,
-        dataQuality: profile.dataQuality,
+        confidence: SafeProfileProcessor.safeAccess(profile, 'confidence', 0.8),
+        dataQuality: SafeProfileProcessor.safeAccess(profile, 'dataQuality', undefined),
         processingTime,
         retryCount: 1
       });
@@ -275,16 +293,16 @@ const EnhancedProfileBuilder: React.FC = () => {
       // Enhanced success toast with metrics
       toast({
         title: 'Profile Generated Successfully!',
-        description: `Extracted with ${Math.round(profile.confidence * 100)}% confidence in ${(processingTime / 1000).toFixed(1)}s`,
+        description: `Extracted with ${Math.round(SafeProfileProcessor.safeAccess(profile, 'confidence', 0.8) * 100)}% confidence in ${(processingTime / 1000).toFixed(1)}s`,
       });
 
       // Log analytics
       console.log('Profile generation analytics:', {
         url: state.url,
         success: true,
-        confidence: profile.confidence,
+        confidence: SafeProfileProcessor.safeAccess(profile, 'confidence', 0.8),
         processingTime,
-        dataQuality: profile.dataQuality,
+        dataQuality: SafeProfileProcessor.safeAccess(profile, 'dataQuality', undefined),
         retryCount: 1
       });
 

@@ -28,10 +28,13 @@ export const ApiKeySettings: React.FC = () => {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">API Key</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent aria-describedby="api-config-description">
         <DialogHeader>
           <DialogTitle>API Configuration</DialogTitle>
         </DialogHeader>
+        <div id="api-config-description" className="sr-only">
+          Configure your API keys for enhanced profile generation. ScrapingBee provides reliable web scraping, while Gemini enables AI-powered content extraction.
+        </div>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="scrapingbee">ScrapingBee API Key (Primary)</Label>

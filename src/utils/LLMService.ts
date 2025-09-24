@@ -44,17 +44,30 @@ export class WebScrapingService {
       
       console.log(`Trying ScrapingBee API for: ${url}`);
       
-      const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&premium_proxy=false`;
-      
-      const response = await fetch(scrapingBeeUrl);
-      if (response.ok) {
-        const content = await response.text();
-        if (content && content.length > 100) {
-          console.log(`✅ ScrapingBee successful! Content length: ${content.length}`);
-          return content;
+      try {
+        const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${apiKey}&url=${encodeURIComponent(url)}&render_js=false&premium_proxy=false&timeout=15000`;
+        
+        const response = await fetch(scrapingBeeUrl, {
+          method: 'GET',
+          timeout: 20000
+        });
+        
+        if (response.ok) {
+          const content = await response.text();
+          if (content && content.length > 100) {
+            console.log(`✅ ScrapingBee successful! Content length: ${content.length}`);
+            return content;
+          } else {
+            throw new Error('ScrapingBee returned empty or insufficient content');
+          }
+        } else {
+          const errorText = await response.text().catch(() => 'Unknown error');
+          throw new Error(`ScrapingBee failed: ${response.status} ${response.statusText} - ${errorText}`);
         }
+      } catch (error) {
+        console.error('ScrapingBee error:', error);
+        throw error instanceof Error ? error : new Error('ScrapingBee request failed');
       }
-      throw new Error(`ScrapingBee failed: ${response.status} ${response.statusText}`);
     },
 
     // Method 2: Direct fetch with headers rotation

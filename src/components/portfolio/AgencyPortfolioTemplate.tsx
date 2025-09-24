@@ -51,155 +51,134 @@ export const AgencyPortfolioTemplate: React.FC<AgencyPortfolioProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 p-8">
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-5xl font-bold text-foreground mb-4 tracking-tight">
-                {profileData.name}
-              </h1>
-              <p className="text-2xl text-primary font-semibold mb-2">
-                {profileData.jobTitle || 'Professional Actor'}
-              </p>
-              <div className="flex items-center gap-4 text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>{profileData.location || 'Los Angeles, CA'}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>Available</span>
-                </div>
-              </div>
-            </div>
-            
-            <p className="text-lg leading-relaxed text-muted-foreground">
-              {profileData.description || profileData.biography || 'Award-winning talent with extensive experience across film, television, and theater.'}
-            </p>
-
-            <div className="flex gap-3">
-              <Button className="gradient-premium">
-                <Download className="w-4 h-4 mr-2" />
-                Download Portfolio
-              </Button>
-              <Button variant="outline">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                View Reel
-              </Button>
-            </div>
+    <div className="max-w-6xl mx-auto p-8 bg-background">
+      {/* Header with Profile Image and Basic Info */}
+      <div className="text-center mb-12">
+        <div className="relative inline-block mb-6">
+          <div className="w-48 h-48 mx-auto rounded-full overflow-hidden gradient-border-premium">
+            <img 
+              src={profileData.image || 'https://via.placeholder.com/200'}
+              alt={profileData.name || 'Profile'}
+              className="w-full h-full object-cover"
+            />
           </div>
-
-          <div className="relative">
-            {profileData.image && (
-              <div className="relative group">
-                <img 
-                  src={profileData.image} 
-                  alt={profileData.name}
-                  className="w-full max-w-md mx-auto rounded-2xl shadow-xl-premium aspect-[3/4] object-cover hover-lift"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl"></div>
-              </div>
-            )}
+          <div className="absolute -bottom-2 -right-2 p-3 bg-primary rounded-full shadow-xl-premium">
+            <Star className="w-6 h-6 text-white" />
           </div>
         </div>
+        
+        <h1 className="text-5xl font-bold mb-4 gradient-premium bg-clip-text text-transparent">
+          {profileData.name || 'Professional Actor'}
+        </h1>
+        
+        <div className="flex flex-wrap justify-center gap-4 mb-6">
+          {profileData.jobTitle && (
+            <Badge variant="outline" className="text-lg py-2 px-4">
+              <User className="w-4 h-4 mr-2" />
+              {profileData.jobTitle}
+            </Badge>
+          )}
+          {profileData.location && (
+            <Badge variant="outline" className="text-lg py-2 px-4">
+              <MapPin className="w-4 h-4 mr-2" />
+              {profileData.location}
+            </Badge>
+          )}
+        </div>
+        
+        {profileData.description && (
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            {profileData.description}
+          </p>
+        )}
       </div>
 
-      {/* Portfolio Tabs */}
-      <Tabs defaultValue="gallery" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-8">
-          <TabsTrigger value="gallery" className="flex items-center gap-2">
-            <Camera className="w-4 h-4" />
-            Gallery
-          </TabsTrigger>
-          <TabsTrigger value="filmography" className="flex items-center gap-2">
-            <Film className="w-4 h-4" />
-            Filmography
-          </TabsTrigger>
-          <TabsTrigger value="awards" className="flex items-center gap-2">
-            <Award className="w-4 h-4" />
-            Awards
-          </TabsTrigger>
-          <TabsTrigger value="media" className="flex items-center gap-2">
-            <Play className="w-4 h-4" />
-            Media
-          </TabsTrigger>
-        </TabsList>
+      {/* Navigation Tabs */}
+      <Tabs defaultValue="filmography" className="space-y-8">
+        <div className="flex justify-center">
+          <TabsList className="grid w-full max-w-md grid-cols-3 shadow-xl-premium">
+            <TabsTrigger value="filmography" className="flex items-center gap-2">
+              <Film className="w-4 h-4" />
+              Filmography
+            </TabsTrigger>
+            <TabsTrigger value="awards" className="flex items-center gap-2">
+              <Award className="w-4 h-4" />
+              Awards
+            </TabsTrigger>
+            <TabsTrigger value="media" className="flex items-center gap-2">
+              <Play className="w-4 h-4" />
+              Media
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        {/* Photo Gallery */}
-        <TabsContent value="gallery" className="space-y-6">
-          <Card className="border-0 shadow-xl-premium">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Camera className="w-5 h-5 text-primary" />
-                Professional Gallery
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {photos.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {photos.map((photo, index) => (
-                    <div 
-                      key={index}
-                      className="group relative aspect-[3/4] overflow-hidden rounded-lg cursor-pointer hover-lift"
-                      onClick={() => openPhotoModal(photo.url, index)}
-                    >
-                      <img 
-                        src={photo.url} 
-                        alt={photo.alt}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                        <Maximize2 className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Camera className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No photos available</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Complete Filmography */}
+        {/* Filmography */}
         <TabsContent value="filmography" className="space-y-6">
           <Card className="border-0 shadow-xl-premium">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Film className="w-5 h-5 text-primary" />
-                Complete Filmography ({profileData.credits?.length || 0})
+                Featured Works
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {profileData.credits && profileData.credits.length > 0 ? (
-                  profileData.credits.map((credit, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-lg">{credit.title}</h4>
-                        <p className="text-muted-foreground">{credit.role}</p>
-                        {credit.department && (
-                          <Badge variant="outline" className="mt-2 text-xs">
-                            {credit.department}
-                          </Badge>
-                        )}
+              <div className="space-y-6">
+                {profileData.knownFor && profileData.knownFor.length > 0 ? (
+                  <div className="grid gap-6">
+                    {profileData.knownFor.map((work, index) => (
+                      <div key={index} className="flex items-start gap-6 p-6 bg-muted/20 rounded-xl hover-lift">
+                        <div className="flex-shrink-0">
+                          <div className="w-20 h-28 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex items-center justify-center">
+                            <Film className="w-8 h-8 text-primary" />
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <h3 className="text-xl font-bold text-foreground">{work.title}</h3>
+                              <p className="text-muted-foreground">{work.role}</p>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              {work.year && (
+                                <Badge variant="secondary" className="mb-1">
+                                  <Calendar className="w-3 h-3 mr-1" />
+                                  {work.year}
+                                </Badge>
+                              )}
+                              {work.rating && (
+                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                  {work.rating}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <Badge variant="secondary">
-                          {credit.year || 'TBA'}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 ) : (
                   <div className="text-center py-12">
                     <Film className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground">No filmography available</p>
+                  </div>
+                )}
+                
+                {/* Extended Filmography */}
+                {profileData.filmography && profileData.filmography.length > 0 && (
+                  <div className="mt-8 pt-8 border-t border-border/50">
+                    <h3 className="text-xl font-semibold mb-4">Complete Filmography</h3>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {profileData.filmography.slice(0, 12).map((film, index) => (
+                        <div key={index} className="p-4 bg-muted/10 rounded-lg hover:bg-muted/20 transition-colors">
+                          <h4 className="font-medium">{film.title}</h4>
+                          <div className="flex items-center justify-between mt-2 text-sm text-muted-foreground">
+                            <span>{film.role}</span>
+                            <span>{film.year}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -217,18 +196,18 @@ export const AgencyPortfolioTemplate: React.FC<AgencyPortfolioProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {profileData.knownFor && profileData.knownFor.length > 0 ? (
+              {profileData.awards && profileData.awards.length > 0 ? (
                 <div className="grid md:grid-cols-2 gap-6">
-                  {profileData.knownFor.map((award, index) => (
+                  {profileData.awards.map((award, index) => (
                     <div key={index} className="flex items-start gap-4 p-4 bg-muted/20 rounded-lg">
                       <div className="p-2 bg-primary/10 rounded-full">
                         <Star className="w-5 h-5 text-primary" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold">{award.title}</h4>
-                        {award.role && (
+                        <h4 className="font-semibold">{award.name}</h4>
+                        {award.category && (
                           <p className="text-sm text-muted-foreground mt-1">
-                            {award.role}
+                            {award.category}
                           </p>
                         )}
                         {award.year && (
@@ -238,7 +217,7 @@ export const AgencyPortfolioTemplate: React.FC<AgencyPortfolioProps> = ({
                         )}
                       </div>
                     </div>
-                  ))
+                  ))}
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -323,49 +302,49 @@ export const AgencyPortfolioTemplate: React.FC<AgencyPortfolioProps> = ({
 
       {/* Photo Modal */}
       {selectedPhoto && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
           <div className="relative max-w-4xl w-full">
-            <img 
-              src={selectedPhoto} 
-              alt="Portfolio photo"
-              className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
-            />
-            
-            {/* Controls */}
             <Button
-              size="sm"
-              variant="outline"
-              className="absolute top-4 right-4 bg-black/50 border-white/20 text-white hover:bg-black/70"
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 z-10 text-white hover:bg-white/10"
               onClick={() => setSelectedPhoto(null)}
             >
-              <X className="w-4 h-4" />
+              <X className="w-6 h-6" />
             </Button>
-
+            
             {photos.length > 1 && (
               <>
                 <Button
-                  size="sm"
-                  variant="outline"
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 border-white/20 text-white hover:bg-black/70"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 text-white hover:bg-white/10"
                   onClick={() => navigatePhoto('prev')}
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-8 h-8" />
                 </Button>
                 <Button
-                  size="sm"
-                  variant="outline"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 border-white/20 text-white hover:bg-black/70"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 text-white hover:bg-white/10"
                   onClick={() => navigatePhoto('next')}
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-8 h-8" />
                 </Button>
               </>
             )}
-
-            {/* Photo counter */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-              {photoIndex + 1} of {photos.length}
-            </div>
+            
+            <img
+              src={selectedPhoto}
+              alt="Portfolio"
+              className="w-full h-full object-contain rounded-lg"
+            />
+            
+            {photos.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm">
+                {photoIndex + 1} of {photos.length}
+              </div>
+            )}
           </div>
         </div>
       )}
